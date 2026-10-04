@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>graphjs - a family tree and a pipeline</title>
+    <link rel="stylesheet" href="../src/css/index.css">
+    <style>
+        :root { color-scheme: light dark; --page: #fbfaf7; --ink: #23211c; --soft: #6c675c; }
+        @media (prefers-color-scheme: dark) { :root { --page: #141310; --ink: #ece7da; --soft: #a8a292; } }
+        html { background: var(--page); color: var(--ink); }
+        body { margin: 0 auto; padding: 2rem 1rem 4rem; max-width: 68rem; font: 15px/1.5 Georgia, 'Times New Roman', serif; }
+        h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
+        h2 { font-size: 1.15rem; margin: 2.5rem 0 .25rem; }
+        p { margin: 0 0 .9rem; color: var(--soft); max-width: 46rem; }
+        code, kbd { font: .86em ui-monospace, Menlo, monospace; }
+        .tools { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0 .75rem; }
+        .tools button { font: inherit; padding: .25rem .7rem; color: inherit; background: none; border: 1px solid currentColor; border-radius: 4px; cursor: pointer; }
+        #tree { --graph-height: 30rem; }
+        #tree .dates { margin-top: .15rem; font-size: .82em; color: var(--graph-sub-color); font-variant-numeric: oldstyle-nums; }
+        #pipeline { --graph-height: 17rem; font-family: system-ui, sans-serif; font-size: 14px; }
+        output { display: block; margin-top: .5rem; min-height: 1.5em; color: var(--soft); font: 13px ui-monospace, Menlo, monospace; }
+    </style>
+</head>
+<body>
+    <h1>graphjs</h1>
+    <p>Drag to move. <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + wheel, or a pinch, to zoom - the wheel alone scrolls the page. With the keyboard, once the graph has the focus: arrows, <kbd>+</kbd> <kbd>-</kbd>, <kbd>0</kbd> to fit, <kbd>Home</kbd>, <kbd>F</kbd>.</p>
+
+    <h2>A family tree</h2>
+    <p>Declared in the page: every person is a link the server rendered, <code>data-graph-from</code> names what it comes from. A union is a node too (<code>data-graph-kind="junction"</code>). Pointing at someone lights their line. All of them are invented.</p>
+    <div class="tools">
+        <button type="button" data-do="fit">fit()</button>
+        <button type="button" data-do="center">center('lucie')</button>
+        <button type="button" data-do="line">highlight('henri')</button>
+        <button type="button" data-do="unline">highlight(null)</button>
+    </div>
+    <div id="tree" data-graph data-graph-preset="tree" data-graph-focus="lucie" aria-label="The Vasseur family">
+        <a href="#auguste" data-graph-node="auguste"><span class="graph-node-label">Auguste Vasseur</span><span class="dates">1871 – 1944</span></a>
+        <a href="#leonie" data-graph-node="leonie"><span class="graph-node-label">Léonie Bardin</span><span class="dates">1876 – 1951</span></a>
+        <span data-graph-node="u-auguste" data-graph-kind="junction" data-graph-from="auguste leonie" title="Married in 1897"></span>
+
+        <a href="#marthe" data-graph-node="marthe" data-graph-from="u-auguste"><span class="graph-node-label">Marthe Vasseur</span><span class="dates">1899 – 1978</span></a>
+        <a href="#henri" data-graph-node="henri" data-graph-from="u-auguste"><span class="graph-node-label">Henri Vasseur</span><span class="dates">1902 – 1969</span></a>
+        <a href="#jeanne" data-graph-node="jeanne"><span class="graph-node-label">Jeanne Collet</span><span class="dates">1905 – 1990</span></a>
+        <span data-graph-node="u-henri" data-graph-kind="junction" data-graph-from="henri jeanne" title="Married in 1927"></span>
+
+        <a href="#paul" data-graph-node="paul" data-graph-from="u-henri"><span class="graph-node-label">Paul Vasseur</span><span class="dates">1929 – 2008</span></a>
+        <a href="#odile" data-graph-node="odile"><span class="graph-node-label">Odile Ferrand</span><span class="dates">1933 – 2015</span></a>
+        <a href="#suzanne" data-graph-node="suzanne" data-graph-from="u-henri"><span class="graph-node-label">Suzanne Vasseur</span><span class="dates">1934 – 2019</span></a>
+        <span data-graph-node="u-paul" data-graph-kind="junction" data-graph-from="paul odile" title="Married in 1955"></span>
+
+        <a href="#alain" data-graph-node="alain" data-graph-from="u-paul"><span class="graph-node-label">Alain Vasseur</span><span class="dates">1957</span></a>
+        <a href="#claire" data-graph-node="claire"><span class="graph-node-label">Claire Morel</span><span class="dates">1960</span></a>
+        <a href="#bernard" data-graph-node="bernard" data-graph-from="u-paul"><span class="graph-node-label">Bernard Vasseur</span><span class="dates">1961</span></a>
+        <span data-graph-node="u-alain" data-graph-kind="junction" data-graph-from="alain claire" title="Married in 1984"></span>
+
+        <a href="#lucie" data-graph-node="lucie" data-graph-from="u-alain"><span class="graph-node-label">Lucie Vasseur</span><span class="dates">1986</span></a>
+        <a href="#thomas" data-graph-node="thomas" data-graph-from="u-alain"><span class="graph-node-label">Thomas Vasseur</span><span class="dates">1989</span></a>
+    </div>
+    <output id="tree-log"></output>
+
+    <h2>A pipeline</h2>
+    <p>Given as data: <code>graph.setData({nodes, edges})</code>, the stages from left to right, each job in its state. <code>setState()</code> changes one without drawing the rest again.</p>
+    <div class="tools">
+        <button type="button" data-do="run">setState('deploy-staging', 'success')</button>
+    </div>
+    <div id="pipeline" data-graph data-graph-preset="pipeline" data-graph-lineage="select" aria-label="Pipeline #482"></div>
+    <output id="pipeline-log"></output>
+
+    <script type="module">
+        import Graph from '../src/js/graph.js';
+
+        const tree = Graph.get(document.getElementById('tree')) || new Graph(document.getElementById('tree'));
+        const pipeline = Graph.get(document.getElementById('pipeline')) || new Graph(document.getElementById('pipeline'));
+
+        pipeline.setData({
+            nodes: [
+                { id: 'install', label: 'install', state: 'success' },
+                { id: 'lint', label: 'lint', state: 'success' },
+                { id: 'unit', label: 'unit tests', state: 'success' },
+                { id: 'functional', label: 'functional tests', state: 'failed' },
+                { id: 'assets', label: 'build assets', state: 'success' },
+                { id: 'image', label: 'docker image', state: 'running' },
+                { id: 'deploy-staging', label: 'deploy staging', state: 'pending' },
+                { id: 'smoke', label: 'smoke tests', state: 'pending' },
+                { id: 'deploy-production', label: 'deploy production', state: 'manual' },
+                { id: 'docs', label: 'publish docs', state: 'skipped' },
+            ],
+            edges: [
+                { from: 'install', to: 'lint' }, { from: 'install', to: 'unit' }, { from: 'install', to: 'functional' }, { from: 'install', to: 'assets' },
+                { from: 'unit', to: 'image' }, { from: 'assets', to: 'image' }, { from: 'lint', to: 'image' },
+                { from: 'image', to: 'deploy-staging' }, { from: 'deploy-staging', to: 'smoke' },
+                { from: 'smoke', to: 'deploy-production' }, { from: 'lint', to: 'docs' },
+            ],
+        });
+
+        document.querySelectorAll('[data-do]').forEach((button) => button.addEventListener('click', () => {
+            switch (button.dataset.do) {
+                case 'fit': tree.fit({ animate: true }); break;
+                case 'center': tree.center('lucie', { animate: true, scale: 1 }); break;
+                case 'line': tree.highlight('henri'); break;
+                case 'unline': tree.highlight(null); break;
+                case 'run': pipeline.setState('deploy-staging', 'success'); break;
+            }
+        }));
+
+        const log = (id, text) => { document.getElementById(id).textContent = text; };
+        document.getElementById('tree').addEventListener('graph:select', (e) => { e.preventDefault(); log('tree-log', 'graph:select ' + e.detail.id); });
+        document.getElementById('tree').addEventListener('graph:view', (e) => log('tree-log', 'graph:view x=' + Math.round(e.detail.x) + ' y=' + Math.round(e.detail.y) + ' scale=' + e.detail.scale.toFixed(2)));
+        document.getElementById('pipeline').addEventListener('graph:select', (e) => log('pipeline-log', 'graph:select ' + e.detail.id));
+
+        window.tree = tree;
+        window.pipeline = pipeline;
+    </script>
+</body>
+</html>

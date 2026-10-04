@@ -1,0 +1,32 @@
+{
+  "name": "@glitchr/graphjs",
+  "version": "1.0.0",
+  "description": "A layered directed graph you can drag and zoom: HTML nodes, SVG links, no dependency",
+  "keywords": ["graph", "dag", "tree", "family tree", "pipeline", "layout", "pan", "zoom"],
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./layout": "./src/js/layout.js",
+    "./graph": "./src/js/graph.js",
+    "./css": "./src/css/index.css",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": ["src", "docs", "example", "README.md", "LICENSE"],
+  "sideEffects": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glitchr-studio/graphjs.git"
+  },
+  "homepage": "https://github.com/glitchr-studio/graphjs#readme",
+  "bugs": "https://github.com/glitchr-studio/graphjs/issues",
+  "author": "Marco Meyer <marco.meyer@glitchr.io>",
+  "license": "LGPL-3.0-or-later",
+  "scripts": {
+    "test": "node --test"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
