@@ -446,6 +446,8 @@ export class Graph {
         if (node.className) el.className = node.className;
         if (node.html !== undefined && node.html !== null) {
             el.innerHTML = node.html;
+        } else if (node.kind === 'junction' && (node.label === undefined || node.label === null)) {
+            // a junction is a dot: it has no text unless one is given
         } else {
             const label = document.createElement('span');
             label.className = 'graph-node-label';
