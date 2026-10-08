@@ -22,7 +22,7 @@
   "homepage": "https://github.com/glitchr-studio/graphjs#readme",
   "bugs": "https://github.com/glitchr-studio/graphjs/issues",
   "author": "Marco Meyer <marco.meyer@glitchr.io>",
-  "license": "LGPL-3.0-or-later",
+  "license": "MIT",
   "scripts": {
     "test": "node --test"
   },

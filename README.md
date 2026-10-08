@@ -140,4 +140,4 @@ python3 -m http.server 8000       # then http://localhost:8000/example/
 
 ## License
 
-LGPL-3.0-or-later.
+MIT since 2026-10-09; earlier versions remain published under LGPL-3.0-or-later.
