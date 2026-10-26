@@ -81,7 +81,7 @@ specific and loaded after the stylesheet:
 | `.graph-node-label`, `.graph-node-sub` | the two lines `setData()` writes |
 | `.graph-edge`, `.graph-edge-flat`, `.is-lineage`, `[data-graph-edge="from to"]`, `[data-graph-state]` (the state of the node it reaches), `[data-graph-kind]` | an edge |
 
-The full list, with when each is set: [Classes and attributes the script sets](api.md#classes-and-attributes-the-script-sets).
+The full list, with when each is set: [Classes and attributes the script sets](reference.md#classes-and-attributes-the-script-sets).
 
 ## States
 

@@ -131,7 +131,7 @@ serve the repository (`python3 -m http.server 8000`) and open `http://localhost:
   takes, every option with its default and its attribute, the presets.
 - [Moving about](interaction.md): drag, wheel, pinch, keyboard, full screen, the remembered view,
   the lit line of a node.
-- [API](api.md): every static and instance method, the events, the classes and attributes the
+- [API](reference.md): every static and instance method, the events, the classes and attributes the
   script sets.
 - [The layout](layout.md): `layout()`, `path()` and `lineage()` without the DOM - how ranks,
   order and places are decided.
