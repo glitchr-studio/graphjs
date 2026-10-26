@@ -131,6 +131,16 @@ path(result.edges[0].points, { direction: 'right', shape: 'step' });   // an SVG
 See [docs/layout.md](docs/layout.md) for how ranks, order and places are decided,
 and [docs/styling.md](docs/styling.md) for the variables.
 
+## Documentation
+
+- [docs/index.md](docs/index.md): what it is, the entry points, installation
+- [docs/graph.md](docs/graph.md): starting a graph, the attributes, the data, every option, the presets
+- [docs/interaction.md](docs/interaction.md): drag, zoom, keyboard, full screen, the remembered view, the lit line
+- [docs/api.md](docs/api.md): the methods, the events, the classes and attributes set
+- [docs/layout.md](docs/layout.md): `layout()`, `path()`, `lineage()` without the DOM
+- [docs/styling.md](docs/styling.md): the `--graph-*` variables, the themes, the states
+- [docs/testing.md](docs/testing.md): the test suite and the example page
+
 ## Example and tests
 
 ```sh

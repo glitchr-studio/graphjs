@@ -1,38 +1,75 @@
 ---
 title: Styling
-order: 3
+order: 50
 ---
 
 # Styling
 
 The stylesheet (`src/css/index.css`) reads only `--graph-*` variables. Set them
-on the `[data-graph]` element or on anything above it.
+on the `[data-graph]` element (see the known defect below about ancestors).
 
-| Variable | |
-|---|---|
-| `--graph-height` | the height of the view (32rem) |
-| `--graph-bg`, `--graph-grid` | the ground and its dots (`transparent`: no dots) |
-| `--graph-border`, `--graph-radius` | the frame |
-| `--graph-node-bg`, `--graph-node-color`, `--graph-node-border`, `--graph-node-radius`, `--graph-node-padding`, `--graph-node-shadow`, `--graph-node-font`, `--graph-node-min-width`, `--graph-node-max-width` | a node |
-| `--graph-sub-color` | a node's second line |
-| `--graph-edge`, `--graph-edge-width` | an edge |
-| `--graph-accent` | the focused node, the lit line, the keyboard focus |
-| `--graph-dim` | the opacity of what is off the lit line |
-| `--graph-control-bg`, `--graph-control-color`, `--graph-control-border` | the buttons |
-| `--graph-success`, `--graph-failed`, `--graph-running`, `--graph-warning`, `--graph-pending` | the states |
+## The variables
+
+| Variable | Default (light) | Dark | |
+|---|---|---|---|
+| `--graph-height` | `32rem` | | the height of the view |
+| `--graph-bg` | `#f6f5f1` | `#1b1a17` | the ground |
+| `--graph-grid` | `rgba(40, 36, 28, .11)` | `rgba(240, 234, 220, .09)` | its dots, every 20 px (`transparent`: no dots) |
+| `--graph-border` | `rgba(40, 36, 28, .16)` | `rgba(240, 234, 220, .16)` | the frame |
+| `--graph-radius` | `6px` | | the frame's corners, and the buttons' block |
+| `--graph-node-bg` | `#fffefb` | `#26241f` | a node |
+| `--graph-node-color` | `#23211c` | `#ece7da` | a node's text (and the element's) |
+| `--graph-node-border` | `rgba(40, 36, 28, .28)` | `rgba(240, 234, 220, .26)` | a node's border |
+| `--graph-node-radius` | `5px` | | a node's corners |
+| `--graph-node-padding` | `.55rem .8rem` | | |
+| `--graph-node-shadow` | `0 1px 0 rgba(40, 36, 28, .08)` | `0 1px 0 rgba(0, 0, 0, .4)` | |
+| `--graph-node-font` | `inherit` | | the `font` shorthand of a node |
+| `--graph-node-min-width`, `--graph-node-max-width` | `7rem`, `15rem` | | a node is as wide as its content between the two |
+| `--graph-sub-color` | `#6c675c` | `#a8a292` | a node's second line, and a skipped or canceled node's text |
+| `--graph-edge` | `#8d877a` | `#7d776a` | an edge, and a junction's ring |
+| `--graph-edge-width` | `1.5px` | | an edge; a lit edge is 0.5 px wider |
+| `--graph-accent` | `#1f4e79` | `#8fb8e0` | the focused node, the lit line, the keyboard focus, a link node under the pointer |
+| `--graph-dim` | `.32` | | the opacity of what is off the lit line |
+| `--graph-control-bg`, `--graph-control-color`, `--graph-control-border` | `#fffefb`, `#23211c`, `rgba(40, 36, 28, .28)` | `#26241f`, `#ece7da`, `rgba(240, 234, 220, .26)` | the buttons |
+| `--graph-success` | `#2e7650` | `#6cba8d` | the states |
+| `--graph-failed` | `#ad3329` | `#e58076` | |
+| `--graph-running` | `#2a5d9f` | `#86b0e6` | |
+| `--graph-warning` | `#9a6a12` | `#d8a94a` | `warning` and `manual` |
+| `--graph-pending` | `#8a857a` | `#8f897c` | `pending`, and any other state |
+
+Two variables are set for a stylesheet to read, not to be set: `--graph-scale` on the element (the
+current zoom, written by the script at every move) and `--graph-state` on a node with a state (the
+colour of its state).
 
 Dark values apply under `prefers-color-scheme: dark`; `data-graph-theme="light"`
 or `"dark"` on the element forces one. A site with its own theme switch sets
-the variables under its own selector.
+the variables under its own selector (for instance `[data-theme="dark"] .graph`, loaded after
+the stylesheet), or writes its theme into `data-graph-theme`.
+
+The defaults are declared on `.graph` itself, and the dark values on
+`.graph:not([data-graph-theme="light"])` (under `prefers-color-scheme: dark`) and
+`.graph[data-graph-theme="dark"]` (two classes' worth of specificity). So set the variables on
+the element, with a selector more specific than those (an id, or three classes' worth), or as
+specific and loaded after the stylesheet:
 
 ```css
-.my-tree {
+#family-tree,          /* an id */
+.page .my-tree {        /* two classes, loaded after src/css/index.css */
     --graph-bg: var(--paper);
     --graph-node-bg: var(--paper-raised);
     --graph-node-font: 500 .95rem/1.25 var(--font-text);
     --graph-accent: var(--ink-red);
 }
 ```
+
+> [!WARNING]
+> Known defect: a `--graph-*` variable set on an ancestor of the element never reaches the graph
+> (the defaults declared on `.graph` replace the inherited value), and one set on the element with
+> a single class (`.my-tree`) is replaced by the dark values when the visitor's system is dark,
+> where the stylesheet's header and the earlier version of this page said "set them on the `[data-graph]` element
+> or on anything above it". Checked in headless Chrome: `--graph-height: 10rem` on a wrapper
+> leaves the graph 512 px high; `.my { --graph-bg: green }` on the element is green in light and
+> `#1b1a17` in dark; `#byid { --graph-bg: blue }` is blue in both.
 
 ## Classes and attributes to hook on
 
@@ -44,6 +81,25 @@ the variables under its own selector.
 | `.graph-node-label`, `.graph-node-sub` | the two lines `setData()` writes |
 | `.graph-edge`, `.graph-edge-flat`, `.is-lineage`, `[data-graph-edge="from to"]`, `[data-graph-state]` (the state of the node it reaches), `[data-graph-kind]` | an edge |
 
+The full list, with when each is set: [Classes and attributes the script sets](api.md#classes-and-attributes-the-script-sets).
+
+## States
+
+| State | A node | An edge reaching it |
+|---|---|---|
+| `success` | `--graph-success` | drawn in `--graph-success` |
+| `failed` | `--graph-failed` | drawn in `--graph-failed` |
+| `running` | `--graph-running` | drawn in `--graph-running`, dashed, the dashes flowing |
+| `warning` | `--graph-warning` | as any edge |
+| `manual` | `--graph-warning` | dotted |
+| `pending` | `--graph-pending` | dotted |
+| `skipped`, `canceled` | `--graph-pending`, a dashed border, the text in `--graph-sub-color` | dotted |
+
+Outside the `pipeline` preset, a node's state colour is only set in `--graph-state` (and the
+dashed border of `skipped` and `canceled`): the `pipeline` preset draws it as a disc. A stylesheet
+uses it elsewhere, for instance `.graph-node[data-graph-state] { border-left: 3px solid var(--graph-state); }`.
+Under `prefers-reduced-motion: reduce` nothing turns or flows, and the view does not glide.
+
 ## Presets
 
 - `tree`: `direction: down`, `edges: step`, centred cards.
@@ -53,3 +109,18 @@ the variables under its own selector.
 
 A preset only sets defaults: the element's `data-graph-*` attributes win over
 it, the options given to `new Graph()` over both.
+
+What each preset's stylesheet sets, on `.graph[data-graph-preset="..."]`:
+
+| Preset | Variables | Nodes |
+|---|---|---|
+| `tree` | `--graph-node-padding: .5rem .75rem`, `--graph-node-min-width: 8.5rem`, `--graph-node-max-width: 12.5rem` | text centred |
+| `pipeline` | `--graph-node-padding: .4rem .8rem .4rem 2rem`, `--graph-node-radius: 999px`, `--graph-node-min-width: 8rem`, `--graph-grid: transparent` | on one line (`nowrap`), the label at weight 500, a disc of 0.8rem at the head in the state's colour; a failed job's border in `--graph-failed` |
+
+The script's half of a preset (direction, edges, gaps) is in [Presets](graph.md#presets).
+
+## Junctions
+
+A node `[data-graph-kind="junction"]` is a ring of 14 px in `--graph-edge` on `--graph-bg`, without
+padding nor shadow: a union in a family tree, a gate in a pipeline. Given as data without a
+`label`, it has no text.
