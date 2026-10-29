@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>graphjs - the --graph-* variables</title>
+    <link rel="stylesheet" href="../../src/css/index.css">
+    <style>
+        .wrap { --graph-height: 10rem; --graph-bg: rgb(0, 128, 0); --graph-accent: rgb(255, 0, 0); --graph-node-radius: 3px; }
+        .my { --graph-bg: rgb(0, 0, 255); }
+        .my .graph-node { --graph-node-bg: rgb(1, 2, 3); }
+        .graph-node { transition: none !important; }   /* the colours read at once, not mid-way */
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div id="inherited" data-graph data-graph-focus="b">
+            <span data-graph-node="a">a</span>
+            <span data-graph-node="b" data-graph-from="a">b</span>
+        </div>
+        <div id="preset-inherited" data-graph data-graph-preset="pipeline">
+            <span data-graph-node="a">a</span>
+        </div>
+    </div>
+    <div id="own" class="my" data-graph><span data-graph-node="a">a</span></div>
+    <div id="default" data-graph><span data-graph-node="a">a</span></div>
+    <div id="dark" data-graph data-graph-theme="dark"><span data-graph-node="a">a</span></div>
+    <div id="light" data-graph data-graph-theme="light"><span data-graph-node="a">a</span></div>
+    <div id="preset" data-graph data-graph-preset="pipeline"><span data-graph-node="a">a</span></div>
+    <pre id="result">pending</pre>
+    <script type="module">
+        import '../../src/js/graph.js';
+        const lines = [];
+        const check = (ok, text) => lines.push((ok ? 'ok ' : 'FAIL ') + text);
+        const style = (id, selector) => getComputedStyle(selector ? document.querySelector('#' + id + ' ' + selector) : document.getElementById(id));
+        const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+        const LIGHT_BG = 'rgb(246, 245, 241)';
+        const DARK_BG = 'rgb(27, 26, 23)';
+
+        // set on an ancestor
+        check(style('inherited').height === '160px', '--graph-height on a wrapper: 160px (' + style('inherited').height + ')');
+        check(style('inherited').backgroundColor === 'rgb(0, 128, 0)', '--graph-bg on a wrapper (' + style('inherited').backgroundColor + ')');
+        check(style('inherited', '.graph-node.is-focus').borderTopColor === 'rgb(255, 0, 0)', '--graph-accent on a wrapper reaches the focused node (' + style('inherited', '.graph-node.is-focus').borderTopColor + ')');
+        check(style('preset-inherited', '.graph-node').borderTopLeftRadius === '3px', '--graph-node-radius on a wrapper wins over the preset (' + style('preset-inherited', '.graph-node').borderTopLeftRadius + ')');
+        // set on the element with one class, on a node
+        check(style('own').backgroundColor === 'rgb(0, 0, 255)', '--graph-bg on the element with one class (' + style('own').backgroundColor + ')');
+        check(style('own', '.graph-node').backgroundColor === 'rgb(1, 2, 3)', '--graph-node-bg on a node (' + style('own', '.graph-node').backgroundColor + ')');
+        // the defaults and the themes
+        check(style('default').backgroundColor === (dark ? DARK_BG : LIGHT_BG), 'the default ground follows the system (' + style('default').backgroundColor + ')');
+        check(style('default').height === '512px', 'the default height (' + style('default').height + ')');
+        check(style('dark').backgroundColor === DARK_BG, 'data-graph-theme="dark" (' + style('dark').backgroundColor + ')');
+        check(style('light').backgroundColor === LIGHT_BG, 'data-graph-theme="light" (' + style('light').backgroundColor + ')');
+        check(style('preset', '.graph-node').borderTopLeftRadius === '999px', 'the preset\'s own value (' + style('preset', '.graph-node').borderTopLeftRadius + ')');
+        // a site's own rule inside a node reads the variables
+        const sub = style('default', '.graph-node').getPropertyValue('--graph-sub-color').trim();
+        check(sub === (dark ? '#a8a292' : '#6c675c'), 'var(--graph-sub-color) is readable inside the graph (' + sub + ')');
+        const inheritedAccent = style('inherited', '.graph-node').getPropertyValue('--graph-accent').trim();
+        check(inheritedAccent === 'rgb(255, 0, 0)', 'var(--graph-accent) inside reads the wrapper\'s value (' + inheritedAccent + ')');
+        document.getElementById('result').textContent = lines.join('\n');
+    </script>
+</body>
+</html>

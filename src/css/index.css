@@ -1,6 +1,9 @@
 /*
  * graphjs - everything a site changes is a --graph-* variable, set on the
- * [data-graph] element or above it:
+ * [data-graph] element or above it, with any selector: the stylesheet never
+ * declares them on the element (its defaults, the dark values and the presets'
+ * values are fallbacks of private --_graph-* tokens), so a value set on an
+ * ancestor is inherited and one set with a single class is not overridden.
  *
  *   --graph-height            the height of the view
  *   --graph-bg, --graph-grid  the ground, and its dots (transparent: none)
@@ -15,88 +18,121 @@
  */
 
 .graph {
-    --graph-height: 32rem;
-    --graph-bg: #f6f5f1;
-    --graph-grid: rgba(40, 36, 28, .11);
-    --graph-border: rgba(40, 36, 28, .16);
-    --graph-radius: 6px;
-    --graph-node-bg: #fffefb;
-    --graph-node-color: #23211c;
-    --graph-node-border: rgba(40, 36, 28, .28);
-    --graph-node-radius: 5px;
-    --graph-node-padding: .55rem .8rem;
-    --graph-node-shadow: 0 1px 0 rgba(40, 36, 28, .08);
-    --graph-node-font: inherit;
-    --graph-node-min-width: 7rem;
-    --graph-node-max-width: 15rem;
-    --graph-sub-color: #6c675c;
-    --graph-edge: #8d877a;
-    --graph-edge-width: 1.5px;
-    --graph-accent: #1f4e79;
-    --graph-dim: .32;
-    --graph-control-bg: #fffefb;
-    --graph-control-color: #23211c;
-    --graph-control-border: rgba(40, 36, 28, .28);
-    --graph-success: #2e7650;
-    --graph-failed: #ad3329;
-    --graph-running: #2a5d9f;
-    --graph-warning: #9a6a12;
-    --graph-pending: #8a857a;
+    --_graph-height: var(--graph-height, 32rem);
+    --_graph-bg: var(--graph-bg, #f6f5f1);
+    --_graph-grid: var(--graph-grid, rgba(40, 36, 28, .11));
+    --_graph-border: var(--graph-border, rgba(40, 36, 28, .16));
+    --_graph-radius: var(--graph-radius, 6px);
+    --_graph-node-bg: var(--graph-node-bg, #fffefb);
+    --_graph-node-color: var(--graph-node-color, #23211c);
+    --_graph-node-border: var(--graph-node-border, rgba(40, 36, 28, .28));
+    --_graph-node-radius: var(--graph-node-radius, 5px);
+    --_graph-node-padding: var(--graph-node-padding, .55rem .8rem);
+    --_graph-node-shadow: var(--graph-node-shadow, 0 1px 0 rgba(40, 36, 28, .08));
+    --_graph-node-font: var(--graph-node-font, inherit);
+    --_graph-node-min-width: var(--graph-node-min-width, 7rem);
+    --_graph-node-max-width: var(--graph-node-max-width, 15rem);
+    --_graph-sub-color: var(--graph-sub-color, #6c675c);
+    --_graph-edge: var(--graph-edge, #8d877a);
+    --_graph-edge-width: var(--graph-edge-width, 1.5px);
+    --_graph-accent: var(--graph-accent, #1f4e79);
+    --_graph-dim: var(--graph-dim, .32);
+    --_graph-control-bg: var(--graph-control-bg, #fffefb);
+    --_graph-control-color: var(--graph-control-color, #23211c);
+    --_graph-control-border: var(--graph-control-border, rgba(40, 36, 28, .28));
+    --_graph-success: var(--graph-success, #2e7650);
+    --_graph-failed: var(--graph-failed, #ad3329);
+    --_graph-running: var(--graph-running, #2a5d9f);
+    --_graph-warning: var(--graph-warning, #9a6a12);
+    --_graph-pending: var(--graph-pending, #8a857a);
 
     position: relative;
     display: block;
-    height: var(--graph-height);
-    color: var(--graph-node-color);
-    background-color: var(--graph-bg);
-    background-image: radial-gradient(var(--graph-grid) 1px, transparent 1px);
+    height: var(--_graph-height);
+    color: var(--_graph-node-color);
+    background-color: var(--_graph-bg);
+    background-image: radial-gradient(var(--_graph-grid) 1px, transparent 1px);
     background-size: 20px 20px;
-    border: 1px solid var(--graph-border);
-    border-radius: var(--graph-radius);
+    border: 1px solid var(--_graph-border);
+    border-radius: var(--_graph-radius);
     overflow: hidden;
 }
 
 @media (prefers-color-scheme: dark) {
     .graph:not([data-graph-theme="light"]) {
-        --graph-bg: #1b1a17;
-        --graph-grid: rgba(240, 234, 220, .09);
-        --graph-border: rgba(240, 234, 220, .16);
-        --graph-node-bg: #26241f;
-        --graph-node-color: #ece7da;
-        --graph-node-border: rgba(240, 234, 220, .26);
-        --graph-node-shadow: 0 1px 0 rgba(0, 0, 0, .4);
-        --graph-sub-color: #a8a292;
-        --graph-edge: #7d776a;
-        --graph-accent: #8fb8e0;
-        --graph-control-bg: #26241f;
-        --graph-control-color: #ece7da;
-        --graph-control-border: rgba(240, 234, 220, .26);
-        --graph-success: #6cba8d;
-        --graph-failed: #e58076;
-        --graph-running: #86b0e6;
-        --graph-warning: #d8a94a;
-        --graph-pending: #8f897c;
+        --_graph-bg: var(--graph-bg, #1b1a17);
+        --_graph-grid: var(--graph-grid, rgba(240, 234, 220, .09));
+        --_graph-border: var(--graph-border, rgba(240, 234, 220, .16));
+        --_graph-node-bg: var(--graph-node-bg, #26241f);
+        --_graph-node-color: var(--graph-node-color, #ece7da);
+        --_graph-node-border: var(--graph-node-border, rgba(240, 234, 220, .26));
+        --_graph-node-shadow: var(--graph-node-shadow, 0 1px 0 rgba(0, 0, 0, .4));
+        --_graph-sub-color: var(--graph-sub-color, #a8a292);
+        --_graph-edge: var(--graph-edge, #7d776a);
+        --_graph-accent: var(--graph-accent, #8fb8e0);
+        --_graph-control-bg: var(--graph-control-bg, #26241f);
+        --_graph-control-color: var(--graph-control-color, #ece7da);
+        --_graph-control-border: var(--graph-control-border, rgba(240, 234, 220, .26));
+        --_graph-success: var(--graph-success, #6cba8d);
+        --_graph-failed: var(--graph-failed, #e58076);
+        --_graph-running: var(--graph-running, #86b0e6);
+        --_graph-warning: var(--graph-warning, #d8a94a);
+        --_graph-pending: var(--graph-pending, #8f897c);
     }
 }
 
 .graph[data-graph-theme="dark"] {
-    --graph-bg: #1b1a17;
-    --graph-grid: rgba(240, 234, 220, .09);
-    --graph-border: rgba(240, 234, 220, .16);
-    --graph-node-bg: #26241f;
-    --graph-node-color: #ece7da;
-    --graph-node-border: rgba(240, 234, 220, .26);
-    --graph-node-shadow: 0 1px 0 rgba(0, 0, 0, .4);
-    --graph-sub-color: #a8a292;
-    --graph-edge: #7d776a;
-    --graph-accent: #8fb8e0;
-    --graph-control-bg: #26241f;
-    --graph-control-color: #ece7da;
-    --graph-control-border: rgba(240, 234, 220, .26);
-    --graph-success: #6cba8d;
-    --graph-failed: #e58076;
-    --graph-running: #86b0e6;
-    --graph-warning: #d8a94a;
-    --graph-pending: #8f897c;
+    --_graph-bg: var(--graph-bg, #1b1a17);
+    --_graph-grid: var(--graph-grid, rgba(240, 234, 220, .09));
+    --_graph-border: var(--graph-border, rgba(240, 234, 220, .16));
+    --_graph-node-bg: var(--graph-node-bg, #26241f);
+    --_graph-node-color: var(--graph-node-color, #ece7da);
+    --_graph-node-border: var(--graph-node-border, rgba(240, 234, 220, .26));
+    --_graph-node-shadow: var(--graph-node-shadow, 0 1px 0 rgba(0, 0, 0, .4));
+    --_graph-sub-color: var(--graph-sub-color, #a8a292);
+    --_graph-edge: var(--graph-edge, #7d776a);
+    --_graph-accent: var(--graph-accent, #8fb8e0);
+    --_graph-control-bg: var(--graph-control-bg, #26241f);
+    --_graph-control-color: var(--graph-control-color, #ece7da);
+    --_graph-control-border: var(--graph-control-border, rgba(240, 234, 220, .26));
+    --_graph-success: var(--graph-success, #6cba8d);
+    --_graph-failed: var(--graph-failed, #e58076);
+    --_graph-running: var(--graph-running, #86b0e6);
+    --_graph-warning: var(--graph-warning, #d8a94a);
+    --_graph-pending: var(--graph-pending, #8f897c);
+}
+
+/* Inside the graph every --graph-* reads the value in force: a site's own rule
+ * for a node's content can use var(--graph-sub-color), var(--graph-accent)... */
+
+:where(.graph) > * {
+    --graph-height: var(--_graph-height);
+    --graph-bg: var(--_graph-bg);
+    --graph-grid: var(--_graph-grid);
+    --graph-border: var(--_graph-border);
+    --graph-radius: var(--_graph-radius);
+    --graph-node-bg: var(--_graph-node-bg);
+    --graph-node-color: var(--_graph-node-color);
+    --graph-node-border: var(--_graph-node-border);
+    --graph-node-radius: var(--_graph-node-radius);
+    --graph-node-padding: var(--_graph-node-padding);
+    --graph-node-shadow: var(--_graph-node-shadow);
+    --graph-node-font: var(--_graph-node-font);
+    --graph-node-min-width: var(--_graph-node-min-width);
+    --graph-node-max-width: var(--_graph-node-max-width);
+    --graph-sub-color: var(--_graph-sub-color);
+    --graph-edge: var(--_graph-edge);
+    --graph-edge-width: var(--_graph-edge-width);
+    --graph-accent: var(--_graph-accent);
+    --graph-dim: var(--_graph-dim);
+    --graph-control-bg: var(--_graph-control-bg);
+    --graph-control-color: var(--_graph-control-color);
+    --graph-control-border: var(--_graph-control-border);
+    --graph-success: var(--_graph-success);
+    --graph-failed: var(--_graph-failed);
+    --graph-running: var(--_graph-running);
+    --graph-warning: var(--_graph-warning);
+    --graph-pending: var(--_graph-pending);
 }
 
 .graph:fullscreen,
@@ -341,9 +377,9 @@ a.graph-node:hover {
 /* ====================================================================== */
 
 .graph[data-graph-preset="tree"] {
-    --graph-node-padding: .5rem .75rem;
-    --graph-node-min-width: 8.5rem;
-    --graph-node-max-width: 12.5rem;
+    --_graph-node-padding: var(--graph-node-padding, .5rem .75rem);
+    --_graph-node-min-width: var(--graph-node-min-width, 8.5rem);
+    --_graph-node-max-width: var(--graph-node-max-width, 12.5rem);
 }
 
 .graph[data-graph-preset="tree"] .graph-node {
@@ -356,10 +392,10 @@ a.graph-node:hover {
 /* ====================================================================== */
 
 .graph[data-graph-preset="pipeline"] {
-    --graph-node-padding: .4rem .8rem .4rem 2rem;
-    --graph-node-radius: 999px;
-    --graph-node-min-width: 8rem;
-    --graph-grid: transparent;
+    --_graph-node-padding: var(--graph-node-padding, .4rem .8rem .4rem 2rem);
+    --_graph-node-radius: var(--graph-node-radius, 999px);
+    --_graph-node-min-width: var(--graph-node-min-width, 8rem);
+    --_graph-grid: var(--graph-grid, transparent);
 }
 
 .graph[data-graph-preset="pipeline"] .graph-node {

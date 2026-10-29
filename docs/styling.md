@@ -6,7 +6,7 @@ order: 50
 # Styling
 
 The stylesheet (`src/css/index.css`) reads only `--graph-*` variables. Set them
-on the `[data-graph]` element (see the known defect below about ancestors).
+on the `[data-graph]` element or on anything above it, with any selector.
 
 ## The variables
 
@@ -46,30 +46,29 @@ or `"dark"` on the element forces one. A site with its own theme switch sets
 the variables under its own selector (for instance `[data-theme="dark"] .graph`, loaded after
 the stylesheet), or writes its theme into `data-graph-theme`.
 
-The defaults are declared on `.graph` itself, and the dark values on
-`.graph:not([data-graph-theme="light"])` (under `prefers-color-scheme: dark`) and
-`.graph[data-graph-theme="dark"]` (two classes' worth of specificity). So set the variables on
-the element, with a selector more specific than those (an id, or three classes' worth), or as
-specific and loaded after the stylesheet:
+The stylesheet never declares a `--graph-*` variable on the element: its defaults, the dark
+values and the presets' values are fallbacks of private tokens (`--_graph-bg:
+var(--graph-bg, #f6f5f1)` on `.graph`, and so on), which its rules read. So a value set by the
+site always wins over them, whatever its selector's specificity and wherever it is set: on the
+element with one class, on a wrapper, on `:root` for every graph of the site. Inside the graph
+(on the element's children) every `--graph-*` is set back to the value in force, so a site's own
+rule for a node's content reads `var(--graph-sub-color)` or `var(--graph-accent)` as expected.
 
 ```css
-#family-tree,          /* an id */
-.page .my-tree {        /* two classes, loaded after src/css/index.css */
+:root {                 /* every graph of the site */
+    --graph-accent: var(--ink-red);
+}
+.my-tree {              /* one class is enough, before or after src/css/index.css */
     --graph-bg: var(--paper);
     --graph-node-bg: var(--paper-raised);
     --graph-node-font: 500 .95rem/1.25 var(--font-text);
-    --graph-accent: var(--ink-red);
 }
+.my-tree .dates { color: var(--graph-sub-color); }
 ```
 
-> [!WARNING]
-> Known defect: a `--graph-*` variable set on an ancestor of the element never reaches the graph
-> (the defaults declared on `.graph` replace the inherited value), and one set on the element with
-> a single class (`.my-tree`) is replaced by the dark values when the visitor's system is dark,
-> where the stylesheet's header and the earlier version of this page said "set them on the `[data-graph]` element
-> or on anything above it". Checked in headless Chrome: `--graph-height: 10rem` on a wrapper
-> leaves the graph 512 px high; `.my { --graph-bg: green }` on the element is green in light and
-> `#1b1a17` in dark; `#byid { --graph-bg: blue }` is blue in both.
+A value the site sets is the same in light and in dark (it replaces both); for a different dark
+value, the site sets it under its own `@media (prefers-color-scheme: dark)` or theme selector.
+The private `--_graph-*` tokens are the stylesheet's own: set the public names, not those.
 
 ## Classes and attributes to hook on
 
@@ -110,7 +109,8 @@ Under `prefers-reduced-motion: reduce` nothing turns or flows, and the view does
 A preset only sets defaults: the element's `data-graph-*` attributes win over
 it, the options given to `new Graph()` over both.
 
-What each preset's stylesheet sets, on `.graph[data-graph-preset="..."]`:
+What each preset's stylesheet sets, on `.graph[data-graph-preset="..."]` (as defaults: a
+variable the site sets wins over the preset's value too):
 
 | Preset | Variables | Nodes |
 |---|---|---|

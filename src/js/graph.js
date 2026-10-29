@@ -116,6 +116,7 @@ export class Graph {
         this._placed = false;         // a first view has been set
         this._listeners = [];
         this._frame = 0;
+        this._made = new WeakSet();    // the nodes setData() made
 
         this._build();
         this._bind();
@@ -143,6 +144,12 @@ export class Graph {
     _build() {
         const root = this.root;
         const o = this.options;
+        // what destroy() gives back: the element's attributes the graph changes, and where each
+        // declared node stood before it moved into the canvas
+        this._given = {
+            attributes: ['class', 'style', 'data-graph-preset', 'data-graph-direction'].map((name) => [name, root.getAttribute(name)]),
+            nodes: new Map(),
+        };
         root.classList.add('graph');
         if (o.preset && !root.dataset.graphPreset) root.dataset.graphPreset = o.preset;
         root.dataset.graphDirection = o.direction;
@@ -163,7 +170,10 @@ export class Graph {
 
         this.canvas.appendChild(this.svg);
         // the nodes the server rendered move into the canvas, in their order
-        Array.from(root.querySelectorAll('[data-graph-node]')).forEach((el) => this.canvas.appendChild(el));
+        Array.from(root.querySelectorAll('[data-graph-node]')).forEach((el) => {
+            this._given.nodes.set(el, { parent: el.parentNode, next: el.nextSibling, class: el.getAttribute('class'), style: el.getAttribute('style') });
+            this.canvas.appendChild(el);
+        });
         this.viewport.appendChild(this.canvas);
         root.insertBefore(this.viewport, root.firstChild);
 
@@ -177,7 +187,7 @@ export class Graph {
                 b.title = o.labels[name];
                 b.setAttribute('aria-label', o.labels[name]);
                 b.innerHTML = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + ICONS[name] + '</svg>';
-                b.addEventListener('click', action);
+                this._on(b, 'click', action);
                 this.controls.appendChild(b);
                 return b;
             };
@@ -419,6 +429,7 @@ export class Graph {
         nodes.forEach((n) => {
             if (this.elements.has(n.id)) return;
             const el = this._element(n);
+            this._made.add(el);
             el.dataset.graphNode = n.id;
             el.classList.add('graph-node');
             if (n.rank !== undefined && n.rank !== null) el.dataset.graphRank = n.rank;
@@ -714,22 +725,69 @@ export class Graph {
         return this;
     }
 
+    // The line follows the edges drawn: one the layout set aside (a cycle's, a loop, a
+    // duplicate, one to no node) leads nowhere.
     _light(id) {
         const on = id !== null && id !== undefined && this.elements.has(String(id));
         this.root.classList.toggle('has-lineage', on);
-        const line = on ? lineage(this.data, id) : null;
+        const line = on ? lineage({ edges: this.paths }, id) : null;
         this.elements.forEach((el, key) => el.classList.toggle('is-lineage', on && line.nodes.has(key)));
-        this.paths.forEach((p) => p.element.classList.toggle('is-lineage', on && line.edges.has(p.index)));
+        this.paths.forEach((p, i) => p.element.classList.toggle('is-lineage', on && line.edges.has(i)));
     }
 
     // -- end -------------------------------------------------------------
 
+    /**
+     * Stops the graph and gives the element back as it was before the start: the listeners
+     * removed (the buttons' included), the viewport, the canvas and the buttons taken out, the
+     * declared nodes back where they stood with their own classes and style, the nodes setData()
+     * made removed, the element's classes, style and the data-graph-preset / -direction the graph
+     * set restored. The graph is forgotten: a later Graph.ready() starts the element afresh.
+     */
     destroy() {
+        if (this._destroyed) return;
         this._destroyed = true;
         this._listeners.forEach(([target, type, handler, options]) => target.removeEventListener(type, handler, options));
         this._listeners = [];
         if (this._observer) this._observer.disconnect();
         clearTimeout(this._gliding);
+        if (this._frame) {
+            if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this._frame); else clearTimeout(this._frame);
+            this._frame = 0;
+        }
+        if (document.fullscreenElement === this.root && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+
+        // the attribute is read first: Chrome writes a style changed through the CSSOM into the
+        // attribute lazily, and a removeAttribute() before that write gets an empty style="" back
+        const restore = (el, name, value) => {
+            if (el.getAttribute(name) === value) return;
+            if (value === null || value === undefined) el.removeAttribute(name); else el.setAttribute(name, value);
+        };
+        const given = this._given;
+        // the declared nodes, last first, so that a node's next sibling is back before it
+        Array.from(given.nodes).reverse().forEach(([el, was]) => {
+            restore(el, 'class', was.class);
+            restore(el, 'style', was.style);
+            el.removeAttribute('data-graph-placed-rank');
+            const next = was.next && was.next.parentNode === was.parent ? was.next : null;
+            if (was.parent) was.parent.insertBefore(el, next);
+        });
+        // a node the site put in the canvas after the start stays in the element
+        Array.from(this.canvas.querySelectorAll('[data-graph-node]')).forEach((el) => {
+            if (given.nodes.has(el) || this._made.has(el)) return;
+            el.classList.remove('graph-node', 'is-focus', 'is-lineage');
+            el.style.removeProperty('left');
+            el.style.removeProperty('top');
+            if (!el.getAttribute('class')) el.removeAttribute('class');
+            if (!el.getAttribute('style')) el.removeAttribute('style');
+            el.removeAttribute('data-graph-placed-rank');
+            this.root.appendChild(el);
+        });
+        this.viewport.remove();
+        if (this.controls) this.controls.remove();
+        given.attributes.forEach(([name, value]) => restore(this.root, name, value));
+        this.elements.clear();
+        this.paths = [];
         instances.delete(this.root);
     }
 }

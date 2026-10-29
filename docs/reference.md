@@ -35,18 +35,10 @@ Every method but `isFullscreen()` and `destroy()` returns the graph, so calls ch
 | `fullscreen(on)` | full screen (`true`), back (`false`), or the other way round (no argument): see [Full screen](interaction.md#full-screen) |
 | `isFullscreen()` | `true` while the element is shown in full screen or has the class `is-fullscreen` |
 | `highlight(id)` | lights a node's line and keeps it lit; `null` puts it out: see [The lit line](interaction.md#the-lit-line) |
-| `destroy()` | removes the listeners the graph added (pointer, wheel, keyboard, focus, fullscreen), stops watching the viewport's size, and forgets the graph (`Graph.get()` then answers `null`) |
+| `destroy()` | stops the graph and gives the element back as it was before the start: removes every listener the graph added (pointer, wheel, keyboard, focus, fullscreen, the buttons'), stops watching the viewport's size, takes the viewport, the canvas, the edges and the buttons out, puts the declared nodes back where they stood with their own classes and style (a node the site put in the canvas after the start is moved back into the element; the nodes `setData()` made are removed), restores the element's `class`, `style`, `data-graph-preset` and `data-graph-direction`, leaves full screen, and forgets the graph (`Graph.get()` then answers `null`). A later `Graph.ready()` - the next `transparent:load` included - starts the element afresh, as on a first load: one viewport, one set of buttons; a page that wants it stopped for good removes its `data-graph` attribute too. A second call does nothing |
 
 `{animate: true}` makes the view glide (the class `is-gliding` for 320 ms, a CSS transition of
 0.28 s; none under `prefers-reduced-motion: reduce`); `{animate: false}` stops a glide under way.
-
-> [!WARNING]
-> Known defect: `destroy()` leaves the DOM the graph built (the viewport, the canvas, the edges,
-> the buttons, the classes) and the buttons' click listeners, which still call the destroyed
-> graph; and since the graph is forgotten, the next `Graph.ready()` - the next `transparent:load`
-> included - starts the element again and builds a second viewport and a second set of buttons
-> beside the first, where `destroy()` is expected to give the element back as it was, or at least
-> to leave it stopped.
 
 ## Instance properties
 

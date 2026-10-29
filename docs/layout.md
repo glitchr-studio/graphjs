@@ -197,5 +197,6 @@ descends from and everything that descends from it (edge indexes are those of
 Siblings are not part of a line: a sibling is neither an ancestor nor a descendant. The walk
 follows every edge of `data.edges`, as given: run on the example's data, `lineage(data, 'lint')`
 gives the nodes `lint`, `build`, `deploy`, `test` and `nowhere`, and the edges 0 to 5, the
-cycle's edge and the edge to no node included (see the known defect in
-[The lit line](interaction.md#the-lit-line)).
+cycle's edge and the edge to no node included. A graph's lit line runs it on the edges the
+layout drew only (see [The lit line](interaction.md#the-lit-line)): pass
+`{edges: result.edges}` for the same walk (its edge indexes are then those of `result.edges`).

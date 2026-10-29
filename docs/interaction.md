@@ -84,7 +84,9 @@ fails.
 ## The lit line
 
 A node's line is the node, everything it descends from and everything that descends from it
-(`lineage()` of [The layout](layout.md#lineage)). Lit, its nodes and edges get the class
+along the edges drawn (`lineage()` of [The layout](layout.md#lineage), run on the edges the
+layout kept: an edge it set aside - a cycle's, a loop, a duplicate, one to no node - is not drawn
+and leads nowhere). Lit, its nodes and edges get the class
 `is-lineage`, the element gets `has-lineage`, and the stylesheet dims everything else
 (`--graph-dim`) and draws the lit edges in `--graph-accent`.
 
@@ -97,8 +99,3 @@ A node's line is the node, everything it descends from and everything that desce
 `highlight(id)` lights a node's line and keeps it lit (the pinned node) whatever the mode;
 `highlight(null)` puts it out.
 
-> [!WARNING]
-> Known defect: the lit line follows every edge of the data, the ones the layout set aside
-> included: an edge that closes a cycle is not drawn, yet the nodes it leads to are lit, where
-> only the drawn edges are expected to count (`src/js/graph.js` `_light()` passes `this.data` to
-> `lineage()`, not the edges of `this.result`).

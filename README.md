@@ -108,7 +108,7 @@ back to the page gives the graph as it was left.
 | `graph.zoomTo(scale, {x, y})`, `zoomIn()`, `zoomOut()`, `pan(dx, dy)`, `fullscreen(on)` | |
 | `graph.highlight(id)` | lights a node's line - its ancestors, its descendants; `null` puts it out |
 | `graph.setState(id, state)` | |
-| `graph.destroy()` | |
+| `graph.destroy()` | stops the graph and gives the element back as it was |
 
 Events, on the element, bubbling:
 
@@ -144,7 +144,7 @@ and [docs/styling.md](docs/styling.md) for the variables.
 ## Example and tests
 
 ```sh
-npm test                          # node --test: the layout
+npm test                          # node --test: the layout, and the Graph class in Chrome (skipped without one)
 python3 -m http.server 8000       # then http://localhost:8000/example/
 ```
 

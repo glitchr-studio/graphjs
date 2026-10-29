@@ -8,11 +8,16 @@ order: 60
 ## The test suite
 
 ```sh
-npm test                          # node --test: the layout
+npm test                          # node --test: the layout, and the Graph class in Chrome
+CHROME=/path/to/chrome npm test   # another browser than the macOS application
 ```
 
 `npm test` runs `node --test`, which finds `test/layout.test.js`: 16 tests of `layout()`, `path()`
-and `lineage()`, without a browser (the layout needs no DOM).
+and `lineage()`, without a browser (the layout needs no DOM); and `test/browser.test.js`, which
+opens each page of `test/browser/` in a headless Chrome (Node 22 or later: it drives Chrome over
+its DevTools protocol with Node's own WebSocket), under a light then a dark colour scheme. Where no
+Chrome is found (`CHROME`, by default
+`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`), that test is skipped and says so.
 
 | Test | Checks |
 |---|---|
@@ -33,21 +38,37 @@ and `lineage()`, without a browser (the layout needs no DOM).
 | path: curve, step and line | the exact `d` of each shape, the radius, a straight stretch, `direction: 'right'`, no point |
 | lineage: ancestors and descendants, not the siblings | |
 
-Run in a container (Node 22), the suite ends:
+| Page of `test/browser/` | Checks |
+|---|---|
+| `css-variables.html` | a `--graph-*` set on a wrapper (height, ground, accent, over a preset's value), on the element with one class, on a node; the defaults in light and dark, `data-graph-theme`, a preset's own value; `var(--graph-*)` read inside the graph |
+| `lineage.html` | the lit line follows the edges drawn: with a → b → c, d → c and the cycle's c → a set aside, d lights c and d only |
+| `destroy.html` | `destroy()` gives the element back as it was (the nodes where they stood), a second start builds one viewport and one set of buttons, a button kept from before calls nothing, a graph given as data is given back empty |
+
+Each page writes its verdict in `#result` (lines starting with `ok`, or `FAIL`); a console error
+or an uncaught exception fails it too. In a container, an image with Node 22 and a Chrome (the
+`puppeteer` image) runs the whole suite; Chrome there needs `--no-sandbox`, which a two-line
+wrapper gives:
+
+```sh
+printf '#!/bin/sh\nexec /path/to/chrome --no-sandbox "$@"\n' > chrome.sh && chmod +x chrome.sh
+docker run --rm -v "$PWD":/repo:ro -v /path/to/dir-with-chrome.sh:/scratch:ro \
+    -e CHROME=/scratch/chrome.sh -w /repo --entrypoint node ghcr.io/puppeteer/puppeteer:24.10.0 --test
+```
+
+There the suite ends:
 
 ```text
-1..16
-# tests 16
+# tests 23
 # suites 0
-# pass 16
+# pass 23
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
 ```
 
-The `Graph` class (the DOM half: measuring, the view, the events) has no automated test in the
-repository; the example page is where it is checked by hand.
+The rest of the `Graph` class (the pointer, the wheel, the keyboard, full screen) is checked by
+hand on the example page.
 
 ## The example page
 

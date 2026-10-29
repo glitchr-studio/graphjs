@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>graphjs - destroy()</title>
+    <link rel="stylesheet" href="../../src/css/index.css">
+</head>
+<body>
+    <div id="declared" data-graph data-graph-focus="b"><p class="intro">Intro</p><a href="#a" data-graph-node="a">a</a><div class="group"><a href="#b" data-graph-node="b" data-graph-from="a">b</a></div><p class="outro">Outro</p></div>
+    <div id="given"></div>
+    <pre id="result">pending</pre>
+    <script>
+        // before graph.js, which starts the declared graph at load
+        window.before = document.getElementById('declared').outerHTML;
+    </script>
+    <script type="module">
+        import { Graph } from '../../src/js/graph.js';
+        const lines = [];
+        const check = (ok, text) => lines.push((ok ? 'ok ' : 'FAIL ') + text);
+        const declared = document.getElementById('declared');
+        const given = document.getElementById('given');
+        const before = window.before;
+        const givenBefore = given.outerHTML;
+        // the auto-start ran at load
+        const graph = Graph.get(declared);
+        check(graph && declared.querySelectorAll('.graph-viewport').length === 1, 'started at load');
+        graph.highlight('b');
+        graph.destroy();
+        check(Graph.get(declared) === null, 'forgotten');
+        check(declared.outerHTML === before, 'the element is given back as it was' + (declared.outerHTML === before ? '' : ': ' + declared.outerHTML));
+        // the buttons' listeners are gone with them; a new start builds one view, not two
+        Graph.ready();
+        check(declared.querySelectorAll('.graph-viewport').length === 1, 'started again: one viewport (' + declared.querySelectorAll('.graph-viewport').length + ')');
+        check(declared.querySelectorAll('.graph-controls').length === 1, 'started again: one set of buttons (' + declared.querySelectorAll('.graph-controls').length + ')');
+        check(Graph.get(declared).elements.size === 2, 'started again: both nodes (' + Graph.get(declared).elements.size + ')');
+        // a button kept from before the destroy calls nothing
+        const kept = Graph.get(declared);
+        const button = declared.querySelector('.graph-control-zoomIn');
+        kept.destroy();
+        let called = false;
+        kept.zoomTo = () => { called = true; return kept; };
+        button.click();
+        check(!called, 'a button kept after destroy() calls nothing');
+        // a graph given as data: its nodes go with it
+        const g = new Graph(given, { preset: 'pipeline' });
+        g.setData({ nodes: [{ id: 'x' }, { id: 'y' }], edges: [{ from: 'x', to: 'y' }] });
+        g.destroy();
+        check(given.outerHTML === givenBefore, 'a graph given as data is given back empty' + (given.outerHTML === givenBefore ? '' : ': ' + given.outerHTML));
+        document.getElementById('result').textContent = lines.join('\n');
+    </script>
+</body>
+</html>
