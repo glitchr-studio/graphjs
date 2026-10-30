@@ -1,6 +1,6 @@
 {
   "name": "@glitchr/graphjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A layered directed graph you can drag and zoom: HTML nodes, SVG links, no dependency",
   "keywords": ["graph", "dag", "tree", "family tree", "pipeline", "layout", "pan", "zoom"],
   "type": "module",
